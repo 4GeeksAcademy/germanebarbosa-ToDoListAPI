@@ -13,53 +13,45 @@ const Home = () => {
 	//style={{backgroundImage: `url(${fondo})`,
 	//backgroundRepeat: "no-repeat"}}
 
-	function getTasks (){
+	function getTasks (){ //Trae tareas del API
 		fetch('https://assets.breatheco.de/apis/fake/todos/user/germanebarbosa', {
 			method: "GET"})
-		.then(response => response.json())
-		.then((data) => console.log(data))
-		}
+		.then((response) => response.json())
+		.then((data) => setTasks(data))
+	}
 
-	function sentTasks (){
-		
-		const newTasks = [
-			{ label: "Make the bed", done: false },
-			{ label: "Walk the dog", done: false },
-			{ label: "Do the replits", done: false }
-		]
-		
-		const tareas = tasks.map((item,index) =>
-		[{label : item, done : false}]
-		)
-		console.log(tareas)
+	function updateTasks(){
 
-
-		fetch('https://assets.breatheco.de/apis/fake/todos/user/germanebarbosa', {
+		const newTasks = {label: task, done: false};
+			fetch('https://assets.breatheco.de/apis/fake/todos/user/germanebarbosa', {
 			method: "PUT",
 			headers: {
 				"Content-Type": "application/json"
 			},
-			body: JSON.stringify(tareas.label)
+			body: JSON.stringify(newTasks)
    		})
-		// .then(resp => {
-		// 	console.log(resp.ok); // will be true if the response is successfull
-		// 	console.log(resp.status); // the status code = 200 or code = 400 etc.
-		// 	console.log(resp.text()); // will try return the exact result as string
-		// 	return resp.json(); // (returns promise) will try to parse the result as json as return a promise that you can .then for results
-		// })
-		// .then(data => {
-		// 	//here is where your code should start after the fetch finishes
-		// 	console.log(data); //this will print on the console the exact object received from the server
-		// })
-		// .catch(error => {
-		// 	//error handling
-		// 	console.log(error);
-		// });
+		// console.log(newTasks)
+		.then(response => {
+			// console.log(resp.ok); // will be true if the response is successfull
+			// console.log(resp.status); // the status code = 200 or code = 400 etc.
+			// console.log(resp.text()); // will try return the exact result as string
+			return response.json();
+		})
+		.then(data => 
+			setTasks([...tasks,data]) //this will print on the console the exact object received from the server
+		)
+		.catch(error => {
+			console.log(error);
+		});
 	}
 
 	useEffect(() => {
 		getTasks()
-	},[tasks])
+	},[])
+
+	// useEffect(() => {
+	// 	updateTasks()
+	// },[tasks])
 
 	return (
 		<>
@@ -75,7 +67,6 @@ const Home = () => {
 									onChange={(e)=>setTask(e.target.value)}
 									onKeyDown={(e)=> {
 										if (e.key === "Enter" && !task == ''){
-											console.log(tasks)
 											setTasks(tasks.concat(task));
 											setTask("")
 										}
@@ -84,7 +75,7 @@ const Home = () => {
 							</li>
 							{tasks.map((item,index) => 
 								<li key={index} className="element">
-									{item} <i className="icon fas fa-trash float-end" 
+									{item.label} <i className="icon fas fa-trash float-end" 
 										onClick={() => 
 											setTasks(
 												tasks.filter(
