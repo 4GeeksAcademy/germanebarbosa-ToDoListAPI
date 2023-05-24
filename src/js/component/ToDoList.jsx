@@ -10,8 +10,6 @@ const Home = () => {
 	// Add into an array => concat
 	// Delete from array => filter
 	// Update => map
-	//style={{backgroundImage: `url(${fondo})`,
-	//backgroundRepeat: "no-repeat"}}
 
 	function getTasks (){ //Trae tareas del API
 		fetch('https://assets.breatheco.de/apis/fake/todos/user/germanebarbosa', {
@@ -20,38 +18,32 @@ const Home = () => {
 		.then((data) => setTasks(data))
 	}
 
-	function updateTasks(){
+	function updateTasks(opt,index){
+		let newTasks = []
 
-		const newTasks = {label: task, done: false};
-			fetch('https://assets.breatheco.de/apis/fake/todos/user/germanebarbosa', {
+		if(opt == "put"){
+			newTasks = [...tasks,{label: task, done: false}];
+		} else {
+			newTasks = (tasks.filter(
+				(t,currentIndex) => 
+					index != currentIndex
+					)
+				)
+		}
+		
+		fetch('https://assets.breatheco.de/apis/fake/todos/user/germanebarbosa', {
 			method: "PUT",
-			headers: {
-				"Content-Type": "application/json"
-			},
+			headers: {"Content-Type": "application/json"},
 			body: JSON.stringify(newTasks)
    		})
-		// console.log(newTasks)
-		.then(response => {
-			// console.log(resp.ok); // will be true if the response is successfull
-			// console.log(resp.status); // the status code = 200 or code = 400 etc.
-			// console.log(resp.text()); // will try return the exact result as string
-			return response.json();
-		})
-		.then(data => 
-			setTasks([...tasks,data]) //this will print on the console the exact object received from the server
-		)
-		.catch(error => {
-			console.log(error);
-		});
+		.then(response => {return response.json();})
+		.then(data => console.log(data)) //this will print on the console the exact object received from the server
+		.catch(error => {console.log(error);});
 	}
 
 	useEffect(() => {
 		getTasks()
-	},[])
-
-	// useEffect(() => {
-	// 	updateTasks()
-	// },[tasks])
+	},[tasks])
 
 	return (
 		<>
@@ -67,7 +59,7 @@ const Home = () => {
 									onChange={(e)=>setTask(e.target.value)}
 									onKeyDown={(e)=> {
 										if (e.key === "Enter" && !task == ''){
-											setTasks(tasks.concat(task));
+											updateTasks("put",null)
 											setTask("")
 										}
 									}}
@@ -76,15 +68,7 @@ const Home = () => {
 							{tasks.map((item,index) => 
 								<li key={index} className="element">
 									{item.label} <i className="icon fas fa-trash float-end" 
-										onClick={() => 
-											setTasks(
-												tasks.filter(
-													(t,currentIndex) => 
-														index != currentIndex
-														)
-													)
-												}
-											></i>
+										onClick={() => updateTasks("delete",index)}></i>
 								</li>
 							)}
 							<li className="footer">{tasks.length} Tasks</li>
